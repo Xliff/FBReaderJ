@@ -616,6 +616,10 @@
 				<node name="summaryOn" value="Show TOC marks in the footer bar"/>
 				<node name="summaryOff" value="Don't show TOC marks in the footer bar"/>
 			</node>
+			<node name="tocMarks2" value="Show Secondary TOC marks">
+			    <node name="summaryOn" value="Show Secondary TOC marks in the footer bar"/>
+				<node name="summaryOff" value="Don't show Secondary TOC marks in the footer bar"/>
+			</node>
 			<node name="showProgress" value="Show page number">
 				<node name="summaryOn" value="Show page number in footer"/>
 				<node name="summaryOff" value="Don't show page number in footer"/>

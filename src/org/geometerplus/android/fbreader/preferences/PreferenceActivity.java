@@ -414,6 +414,7 @@ public class PreferenceActivity extends ZLPreferenceActivity {
 		)));
 		footerPreferences.add(statusLineScreen.addOption(profile.FooterFillOption, "footerColor"));
 		footerPreferences.add(statusLineScreen.addOption(footerOptions.ShowTOCMarks, "tocMarks"));
+		footerPreferences.add(statusLineScreen.addOption(footerOptions.ShowTOCMarks2, "tocMarks2"));
 
 		footerPreferences.add(statusLineScreen.addOption(footerOptions.ShowProgress, "showProgress"));
 		footerPreferences.add(statusLineScreen.addOption(footerOptions.ShowClock, "showClock"));

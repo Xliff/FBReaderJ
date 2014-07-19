@@ -23,6 +23,7 @@ import org.geometerplus.zlibrary.core.options.*;
 
 public class FooterOptions {
 	public final ZLBooleanOption ShowTOCMarks;
+	public final ZLBooleanOption ShowTOCMarks2;
 	public final ZLBooleanOption ShowClock;
 	public final ZLBooleanOption ShowBattery;
 	public final ZLBooleanOption ShowProgress;
@@ -30,6 +31,7 @@ public class FooterOptions {
 
 	public FooterOptions() {
 		ShowTOCMarks = new ZLBooleanOption("Options", "FooterShowTOCMarks", true);
+		ShowTOCMarks2 = new ZLBooleanOption("Options", "FooterShowTOCMarks2", true);
 		ShowClock = new ZLBooleanOption("Options", "ShowClockInFooter", true);
 		ShowBattery = new ZLBooleanOption("Options", "ShowBatteryInFooter", true);
 		ShowProgress = new ZLBooleanOption("Options", "ShowProgressInFooter", true);
