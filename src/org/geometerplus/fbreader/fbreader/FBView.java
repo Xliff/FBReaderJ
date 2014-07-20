@@ -567,6 +567,7 @@ public final class FBView extends ZLTextView {
 			//final ZLColor bgColor = getBackgroundColor();
 			// TODO: separate color option for footer color
 			final ZLColor fgColor = getTextColor(ZLTextHyperlink.NO_LINK);
+			// cw: xxx - Either remove [fgColor2] or add a [fillColor2] and make them preferences.
 			final ZLColor fgColor2 = new ZLColor(0, 0, 255);
 			final ZLColor fillColor = myViewOptions.getColorProfile().FooterFillOption.getValue();
 
@@ -596,6 +597,8 @@ public final class FBView extends ZLTextView {
 				height > 10, false, false, false
 			);
 
+			// cw: xxx - Need to see if we can get current ParagraphIndex, somehow. We can either code the mods
+			// here or maybe add them to the view. Depends on where it makes sense to have them done.
 			final PagePosition pagePosition = FBView.this.pagePosition();
 
 			final StringBuilder info = new StringBuilder();
@@ -655,8 +658,12 @@ public final class FBView extends ZLTextView {
 						final int refCoord = sizeOfTextBeforeParagraph(reference.ParagraphIndex);
 						final int xCoord =
 							left + 2 * lineWidth + (int)(1.0 * myGaugeWidth * refCoord / fullLength);
+						context.setLineColor(fgColor);
 						context.drawLine(xCoord, height - lineWidth, xCoord, lineWidth);
 						
+						// cw: XXX - The current implementation of chapter marks uses ALL of them, 
+						// since we have no way to get the current position in the chapter.
+						// This is also why the fill bar doesn't work!
 						if (footerOptions.ShowTOCMarks2.getValue()) {
 							// Draw secondary gauge.
 							context.setLineColor(fgColor2);
