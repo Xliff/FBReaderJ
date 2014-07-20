@@ -446,12 +446,12 @@ public final class FBView extends ZLTextView {
 	}
 
 	private class Footer implements FooterArea {
-		private int heightScale;
+		private double heightScale;
 		private ArrayList<Integer> chapterRefs;
 		
 		Footer() {
 			final FooterOptions footerOptions = myViewOptions.getFooterOptions();
-			heightScale = (int)((footerOptions.ShowTOCMarks2.getValue()) ? 2.25 : 1);
+			heightScale = (footerOptions.ShowTOCMarks2.getValue()) ? 2.5 : 1;
 			chapterRefs = null;
 		}
 		
@@ -465,7 +465,7 @@ public final class FBView extends ZLTextView {
 		private ArrayList<ArrayList<TOCTree>> myTOCMarks2;
 
 		public int getHeight() {
-			return getRealHeight() * heightScale;
+			return (int)(getRealHeight() * heightScale);
 		}
 		
 		private int getRealHeight() {
@@ -567,6 +567,7 @@ public final class FBView extends ZLTextView {
 			//final ZLColor bgColor = getBackgroundColor();
 			// TODO: separate color option for footer color
 			final ZLColor fgColor = getTextColor(ZLTextHyperlink.NO_LINK);
+			final ZLColor fgColor2 = new ZLColor(0, 0, 255);
 			final ZLColor fillColor = myViewOptions.getColorProfile().FooterFillOption.getValue();
 
 			final int left = getLeftMargin();
@@ -574,9 +575,16 @@ public final class FBView extends ZLTextView {
 			
 			// cw:  Determine proper height values so that secondary gauge appears on the bottom.
 			final int height = getRealHeight();
-			final int height2 = (footerOptions.ShowTOCMarks2.getValue()) ? (int)(height * 1.25) : 0;
-			
 			final int lineWidth = height <= 10 ? 1 : 2;
+			final int height2 = getHeight() - lineWidth;
+			
+			final int lineWidth2;
+			if ((footerOptions.ShowTOCMarks2.getValue())) {
+				lineWidth2 = height2 - (int)(getRealHeight() * 1.5);
+			} else {
+				lineWidth2 = 0;
+			}
+			
 			final int delta = height <= 10 ? 0 : 1;
 			final String family = footerOptions.Font.getValue();
 			if (myFontEntry == null || !family.equals(myFontEntry.get(0).Family)) {
@@ -621,6 +629,7 @@ public final class FBView extends ZLTextView {
 			final int gaugeRight = right - (infoWidth == 0 ? 0 : infoWidth + 10);
 			myGaugeWidth = gaugeRight - left - 2 * lineWidth;
 
+			// Draw Primary gauge.
 			context.setLineColor(fgColor);
 			context.setLineWidth(lineWidth);
 			context.drawLine(left, lineWidth, left, height - lineWidth);
@@ -649,38 +658,49 @@ public final class FBView extends ZLTextView {
 						context.drawLine(xCoord, height - lineWidth, xCoord, lineWidth);
 						
 						if (footerOptions.ShowTOCMarks2.getValue()) {
+							// Draw secondary gauge.
+							context.setLineColor(fgColor2);
+							context.setLineWidth(lineWidth);
+							context.drawLine(left, height2 - lineWidth2, left, height2);
+							context.drawLine(left, height2, gaugeRight, height2);
+							context.drawLine(gaugeRight, height2, gaugeRight, height2 - lineWidth2);
+							context.drawLine(gaugeRight, height2 - lineWidth2, left, height2 - lineWidth2);
+							
 							// cw: Determine current primary chapter.
 							ListIterator<Integer> csri = chapterRefs.listIterator(chapterRefs.size());
 							while (csri.hasPrevious()) {
-								if (csri.previous() < refCoord) {
+								if (csri.previous() <= refCoord) {
 									break;
 								}
 							}
 							int secondaryIndex = csri.nextIndex();
 							ArrayList<TOCTree> secondaryTree = myTOCMarks2.get(secondaryIndex);
-							int chapterStart = (chapterRefs.get(secondaryIndex) != null) ? chapterRefs.get(secondaryIndex) : -1; 
-							int chapterPos = refCoord - chapterStart;
-							int chapterEnd;
-							if (secondaryTree.equals(myTOCMarks2.get(myTOCMarks2.size() - 1))) {
-								chapterEnd = fullLength;
-							} else {
-								chapterEnd = chapterRefs.get(secondaryIndex + 1) - 1;
-							}
-							int chapterLength = chapterEnd - chapterStart - 1;
 							
-							final int gaugeInternalRight2 = left 
-									+ lineWidth 
-									+ (int)(1.0 * myGaugeWidth * chapterPos / chapterLength);
-
-							context.setFillColor(fillColor);
-							context.fillRectangle(left + 1, height2 - 2 * lineWidth, gaugeInternalRight2, lineWidth + 1);
-							
-							for (TOCTree tocItem2: secondaryTree) {
-								TOCTree.Reference reference2 = tocItem2.getReference();
-								final int refCoord2 = sizeOfTextBeforeParagraph(reference2.ParagraphIndex);
-								final int xCoord2 =
-									left + 2 * lineWidth + (int)(1.0 * myGaugeWidth * refCoord2 / chapterLength);
-								context.drawLine(xCoord2, height2 - lineWidth, xCoord2, lineWidth);
+							if (secondaryTree.size() > 1) {
+								int chapterStart = (chapterRefs.get(secondaryIndex) != null) ? chapterRefs.get(secondaryIndex) : -1; 
+								int chapterPos = refCoord - chapterStart;
+								int chapterEnd;
+								if (secondaryTree.equals(myTOCMarks2.get(myTOCMarks2.size() - 1))) {
+									chapterEnd = fullLength;
+								} else {
+									chapterEnd = chapterRefs.get(secondaryIndex + 1) - 1;
+								}
+								int chapterLength = chapterEnd - chapterStart - 1;
+								
+								final int gaugeInternalRight2 = left 
+										+ lineWidth 
+										+ (int)(1.0 * myGaugeWidth * chapterPos / chapterLength);
+	
+								context.setFillColor(fillColor);
+								context.fillRectangle(left + 1, height2 - lineWidth2, gaugeInternalRight2, lineWidth2 + 1);
+								
+								for (TOCTree tocItem2: secondaryTree) {
+									TOCTree.Reference reference2 = tocItem2.getReference();
+									final int refCoord2 = sizeOfTextBeforeParagraph(reference2.ParagraphIndex);
+									final int xCoord2 =
+										left + 2 * lineWidth2 + (int)(1.0 * myGaugeWidth * refCoord2 / chapterLength);
+									context.drawLine(xCoord2, height2, xCoord2, height2 - lineWidth2);
+								}
 							}
 						}
 					}
