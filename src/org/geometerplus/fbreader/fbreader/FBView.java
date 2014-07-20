@@ -246,6 +246,9 @@ public final class FBView extends ZLTextView {
 					case openDictionary:
 						doSelectRegion = true;
 						break;
+					case doNothing:
+					default:
+						break;
 				}
 			} else if (soul instanceof ZLTextImageRegionSoul) {
 				doSelectRegion =
@@ -537,7 +540,7 @@ public final class FBView extends ZLTextView {
 				myTOCMarks.add(tocItem);
 				ArrayList<TOCTree> newSecondaryTree = new ArrayList<TOCTree>();
 				for (TOCTree tocItem2: tocItem.allSubtrees(determineMaxTOCLevel(tocItem))) {
-					newSecondaryTree.add(tocItem2);
+						newSecondaryTree.add(tocItem2);
 				}
 				myTOCMarks2.add(newSecondaryTree);
 			}
@@ -567,7 +570,7 @@ public final class FBView extends ZLTextView {
 			//final ZLColor bgColor = getBackgroundColor();
 			// TODO: separate color option for footer color
 			final ZLColor fgColor = getTextColor(ZLTextHyperlink.NO_LINK);
-			// cw: xxx - Either remove [fgColor2] or add a [fillColor2] and make them preferences.
+			// TODO: cw - Either remove [fgColor2] or add a [fillColor2] and make them preferences.
 			final ZLColor fgColor2 = new ZLColor(0, 0, 255);
 			final ZLColor fillColor = myViewOptions.getColorProfile().FooterFillOption.getValue();
 
@@ -663,9 +666,6 @@ public final class FBView extends ZLTextView {
 					}
 				}
 						
-				// cw: XXX - The current implementation of chapter marks uses ALL of them, 
-				// since we have no way to get the current position in the chapter.
-				// This is also why the fill bar doesn't work!
 				if (footerOptions.ShowTOCMarks2.getValue()) {
 					// Draw secondary gauge.
 					context.setLineColor(fgColor2);
@@ -676,7 +676,7 @@ public final class FBView extends ZLTextView {
 					context.drawLine(gaugeRight, height2 - lineWidth2, left, height2 - lineWidth2);
 					
 					final Integer curParaIndex = myReader.getCurrentParagraphIndex();
-					final int refCoord =  (curParaIndex != null) ? sizeOfTextBeforeParagraph(curParaIndex) : -1;
+					final int refCoord = (curParaIndex != null) ? sizeOfTextBeforeParagraph(curParaIndex) : -1;
 					
 					// cw: Determine current primary chapter.
 					ListIterator<Integer> csri = chapterRefs.listIterator(chapterRefs.size());
@@ -688,27 +688,28 @@ public final class FBView extends ZLTextView {
 					int secondaryIndex = csri.nextIndex();					
 					
 					ArrayList<TOCTree> secondaryTree = myTOCMarks2.get(secondaryIndex);
-					if (secondaryTree.size() > 1) {
-						int chapterStart = (chapterRefs.get(secondaryIndex) != null) ? chapterRefs.get(secondaryIndex) : -1; 
-						int chapterPos = refCoord - chapterStart;
-						int chapterEnd;
-						if (secondaryTree.equals(myTOCMarks2.get(myTOCMarks2.size() - 1))) {
-							chapterEnd = fullLength;
-						} else {
-							chapterEnd = chapterRefs.get(secondaryIndex + 1) - 1;
-						}
-						int chapterLength = chapterEnd - chapterStart - 1;
-						
-						final int gaugeInternalRight2 = left 
-								+ lineWidth 
-								+ (int)(1.0 * myGaugeWidth * chapterPos / chapterLength);
+					int chapterStart = (chapterRefs.get(secondaryIndex) != null) ? chapterRefs.get(secondaryIndex) : -1; 
+					// Get RELATIVE chapter length.
+					int chapterLength;
+					if (secondaryTree.equals(myTOCMarks2.get(myTOCMarks2.size() - 1))) {
+						chapterLength = fullLength;
+					} else {
+						chapterLength = chapterRefs.get(secondaryIndex + 1) ;
+					}
+					chapterLength -= chapterStart;
+					
+					// cw: xxx - Still having scaling problems here. Are the chapter calcs above correct?
+					final int gaugeInternalRight2 = left 
+							+ lineWidth 
+							+ (int)(1.0 * myGaugeWidth * (refCoord - chapterStart) / chapterLength);
 
-						context.setFillColor(fillColor);
-						context.fillRectangle(left + 1, height2 - 2, gaugeInternalRight2, height2 - lineWidth2 + 1);
-						
+					context.setFillColor(fillColor);
+					context.fillRectangle(left + 1, height2 - 2, gaugeInternalRight2, height2 - lineWidth2 + 1);
+					
+					if (secondaryTree.size() > 1) {
 						for (TOCTree tocItem2: secondaryTree) {
 							TOCTree.Reference reference2 = tocItem2.getReference();
-							final int refCoord2 = sizeOfTextBeforeParagraph(reference2.ParagraphIndex);
+							final int refCoord2 = sizeOfTextBeforeParagraph(reference2.ParagraphIndex) - chapterStart;
 							final int xCoord2 =
 								left + 2 * lineWidth2 + (int)(1.0 * myGaugeWidth * refCoord2 / chapterLength);
 							context.drawLine(xCoord2, height2, xCoord2, height2 - lineWidth2);
