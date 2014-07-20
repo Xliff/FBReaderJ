@@ -527,6 +527,14 @@ public final class FBReaderApp extends ZLApplication {
 		}
 		return treeToSelect;
 	}
+	
+	public Integer getCurrentParagraphIndex() {
+		final ZLTextWordCursor cursor = BookTextView.getStartCursor();
+		if (Model == null || cursor == null) {
+			return null;
+		}
+		return cursor.getParagraphIndex();
+	}
 
 	public void onBookUpdated(Book book) {
 		if (Model == null || Model.Book == null || !Model.Book.equals(book)) {

@@ -660,55 +660,58 @@ public final class FBView extends ZLTextView {
 							left + 2 * lineWidth + (int)(1.0 * myGaugeWidth * refCoord / fullLength);
 						context.setLineColor(fgColor);
 						context.drawLine(xCoord, height - lineWidth, xCoord, lineWidth);
+					}
+				}
 						
-						// cw: XXX - The current implementation of chapter marks uses ALL of them, 
-						// since we have no way to get the current position in the chapter.
-						// This is also why the fill bar doesn't work!
-						if (footerOptions.ShowTOCMarks2.getValue()) {
-							// Draw secondary gauge.
-							context.setLineColor(fgColor2);
-							context.setLineWidth(lineWidth);
-							context.drawLine(left, height2 - lineWidth2, left, height2);
-							context.drawLine(left, height2, gaugeRight, height2);
-							context.drawLine(gaugeRight, height2, gaugeRight, height2 - lineWidth2);
-							context.drawLine(gaugeRight, height2 - lineWidth2, left, height2 - lineWidth2);
-							
-							// cw: Determine current primary chapter.
-							ListIterator<Integer> csri = chapterRefs.listIterator(chapterRefs.size());
-							while (csri.hasPrevious()) {
-								if (csri.previous() <= refCoord) {
-									break;
-								}
-							}
-							int secondaryIndex = csri.nextIndex();
-							ArrayList<TOCTree> secondaryTree = myTOCMarks2.get(secondaryIndex);
-							
-							if (secondaryTree.size() > 1) {
-								int chapterStart = (chapterRefs.get(secondaryIndex) != null) ? chapterRefs.get(secondaryIndex) : -1; 
-								int chapterPos = refCoord - chapterStart;
-								int chapterEnd;
-								if (secondaryTree.equals(myTOCMarks2.get(myTOCMarks2.size() - 1))) {
-									chapterEnd = fullLength;
-								} else {
-									chapterEnd = chapterRefs.get(secondaryIndex + 1) - 1;
-								}
-								int chapterLength = chapterEnd - chapterStart - 1;
-								
-								final int gaugeInternalRight2 = left 
-										+ lineWidth 
-										+ (int)(1.0 * myGaugeWidth * chapterPos / chapterLength);
-	
-								context.setFillColor(fillColor);
-								context.fillRectangle(left + 1, height2 - lineWidth2, gaugeInternalRight2, lineWidth2 + 1);
-								
-								for (TOCTree tocItem2: secondaryTree) {
-									TOCTree.Reference reference2 = tocItem2.getReference();
-									final int refCoord2 = sizeOfTextBeforeParagraph(reference2.ParagraphIndex);
-									final int xCoord2 =
-										left + 2 * lineWidth2 + (int)(1.0 * myGaugeWidth * refCoord2 / chapterLength);
-									context.drawLine(xCoord2, height2, xCoord2, height2 - lineWidth2);
-								}
-							}
+				// cw: XXX - The current implementation of chapter marks uses ALL of them, 
+				// since we have no way to get the current position in the chapter.
+				// This is also why the fill bar doesn't work!
+				if (footerOptions.ShowTOCMarks2.getValue()) {
+					// Draw secondary gauge.
+					context.setLineColor(fgColor2);
+					context.setLineWidth(lineWidth);
+					context.drawLine(left, height2 - lineWidth2, left, height2);
+					context.drawLine(left, height2, gaugeRight, height2);
+					context.drawLine(gaugeRight, height2, gaugeRight, height2 - lineWidth2);
+					context.drawLine(gaugeRight, height2 - lineWidth2, left, height2 - lineWidth2);
+					
+					final Integer curParaIndex = myReader.getCurrentParagraphIndex();
+					final int refCoord =  (curParaIndex != null) ? sizeOfTextBeforeParagraph(curParaIndex) : -1;
+					
+					// cw: Determine current primary chapter.
+					ListIterator<Integer> csri = chapterRefs.listIterator(chapterRefs.size());
+					while (csri.hasPrevious()) {
+						if (csri.previous() <= refCoord) {
+							break;
+						}
+					}
+					int secondaryIndex = csri.nextIndex();					
+					
+					ArrayList<TOCTree> secondaryTree = myTOCMarks2.get(secondaryIndex);
+					if (secondaryTree.size() > 1) {
+						int chapterStart = (chapterRefs.get(secondaryIndex) != null) ? chapterRefs.get(secondaryIndex) : -1; 
+						int chapterPos = refCoord - chapterStart;
+						int chapterEnd;
+						if (secondaryTree.equals(myTOCMarks2.get(myTOCMarks2.size() - 1))) {
+							chapterEnd = fullLength;
+						} else {
+							chapterEnd = chapterRefs.get(secondaryIndex + 1) - 1;
+						}
+						int chapterLength = chapterEnd - chapterStart - 1;
+						
+						final int gaugeInternalRight2 = left 
+								+ lineWidth 
+								+ (int)(1.0 * myGaugeWidth * chapterPos / chapterLength);
+
+						context.setFillColor(fillColor);
+						context.fillRectangle(left + 1, height2 - 2, gaugeInternalRight2, height2 - lineWidth2 + 1);
+						
+						for (TOCTree tocItem2: secondaryTree) {
+							TOCTree.Reference reference2 = tocItem2.getReference();
+							final int refCoord2 = sizeOfTextBeforeParagraph(reference2.ParagraphIndex);
+							final int xCoord2 =
+								left + 2 * lineWidth2 + (int)(1.0 * myGaugeWidth * refCoord2 / chapterLength);
+							context.drawLine(xCoord2, height2, xCoord2, height2 - lineWidth2);
 						}
 					}
 				}
